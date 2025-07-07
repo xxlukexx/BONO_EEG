@@ -20,7 +20,7 @@ path_raw = '/Users/luke/Library/CloudStorage/OneDrive-King''sCollegeLondon/_shor
 
     % 1. Walk through folders and make a list of all IDs 
     
-        [results, ops] = PIP1_EEG_interrogate_folder_structure(path_raw);
+        [results, ops] = BONO_EEG_interrogate_folder_structure_claire(path_raw);
         tab = teLogExtract(results);
         
         file_res_mat = fullfile(path_preproc, sprintf('BONE_EEG_pipe_results_%s.mat', datestr(now, 30)));
@@ -28,28 +28,20 @@ path_raw = '/Users/luke/Library/CloudStorage/OneDrive-King''sCollegeLondon/_shor
         
         save(file_res_mat, 'results', 'ops', 'tab')
         writetable(tab, file_res_xl);
+                    
+    % 2. Find split/multiple sessions 
+    
+        % find any split sessions
+        [results, ops, split_found, split_results] = tepFindSplitSessions(results);
         
-%         % remove wave2
-%         tab = teLogExtract(results);
-%         idx_wave2 = strcmpi(tab.visit, 'Timepoint_2');
-%         tab(idx_wave2, :) = [];
-%         results = structArray2cellArrayOfStructs(table2struct(tab));
-%         fprintf('[PIP1_EEG_run_pipeline_v1]: removed %d datasets from wave2\n',...
-%             sum(idx_wave2));
-%             
-%     % 2. Find split/multiple sessions 
-%     
-%         % find any split sessions
-%         [results, ops, split_found, split_results] = tepFindSplitSessions(results);
-%         
-%         % if any are found, display them here and then stop -- they need
-%         % to be fixed manually
-%         if split_found
-%             tab_split_results = teLogExtract(split_results);
-%             fprintf(2, 'Split sessions found, cannot continue. Check and fix manually:\n\n');
-%             disp(tab_split_results)
-%             error('Split sessions found')
-%         end
+        % if any are found, display them here and then stop -- they need
+        % to be fixed manually
+        if split_found
+            tab_split_results = teLogExtract(split_results);
+            fprintf(2, 'Split sessions found, cannot continue. Check and fix manually:\n\n');
+            disp(tab_split_results)
+            error('Split sessions found')
+        end
 %         
 %     % 3. Manually fix split sessions -- see documentation for details
 %     
